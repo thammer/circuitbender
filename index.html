@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+       <!-- For www.waveformer.net <script type="text/javascript" src="../common.js"></script> --> 
+    <head>
+        <meta charset="UTF-8">
+        <title>Waveformer Circuit Bender</title>
+        <!-- For www.waveformer.net <link rel="stylesheet" type="text/css" href="../common.css"/> -->
+        <!-- For www.waveformer.net <link rel="stylesheet" type="text/css" href="../navbar.css"/>  -->
+        <style>
+            body {
+                font-family: 'Roboto', sans-serif;
+            }
+            h1 
+            {
+                text-align: center;
+                margin: 5px 2px 0px 2px;
+            }
+            table#midiMapperTable {
+                border: 1px solid black;
+                border-collapse: collapse;
+                text-align: center;
+                vertical-align: middle;
+                table-layout: auto;
+                width: calc(100% - 8px);
+                margin: 4px 2px 2px 4px
+            } 
+            table#midiMapperTable tr {
+                border: 1px solid black;
+                border-collapse: collapse;
+            } 
+            table#midiMapperTable td, table#midiMapperTable th {
+                border: 1px solid black;
+                border-collapse: collapse;
+                white-space: nowrap;
+                padding: 1px 4px 1px 4px;
+            } 
+
+            table#midiMapperTable td {
+                text-align: left;
+            }
+
+            table#midiMapperTable td#value {
+                background-image: linear-gradient(to right, rgb(240, 240, 240) 0%, rgb(180, 180, 180) 100%);
+                background-repeat: no-repeat; 
+            }
+
+            .check {
+                position: relative;
+                padding-left: 10px;
+                cursor: pointer;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+            }
+            .check input {
+                position: absolute;
+                opacity: 0;
+                cursor: pointer;
+                height: 0;
+                width: 0;
+            }
+            .checkmark {
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 15px;
+                width: 15px;
+                background-color: #eee;
+                border: 1px solid #999;
+                margin-top: 1px;
+                margin-left: -4px;
+            }
+            .check:hover input ~ .checkmark {
+                background-color: #ccc;
+            }
+            .check input:checked ~ .checkmark {
+                background-color: #3a3;
+            }
+            .checkmark:after {
+                content: "";
+                position: absolute;
+                display: none;
+            }
+            .check input:checked ~ .checkmark:after {
+                display: block;
+            }
+            .check .checkmark:after {
+                left: 3px;
+                top: 1px;
+                width: 5px;
+                height: 8px;
+                border: solid white;
+                border-width: 0 3px 3px 0;
+                -webkit-transform: rotate(45deg);
+                -ms-transform: rotate(45deg);
+                transform: rotate(45deg);
+            }            
+        </style>
+    </head>
+    <body>
+        <h1>Waveformer's Circuit Bender</h1>
+        <div id=content">
+            <table id="midiMapperTable">
+                <tr>
+                    <th>Enable</th>
+                    <th>Input device</th>
+                    <th>Channel</th>
+                    <th>Control</th>
+                    <th>Output device</th>
+                    <th>Channel</th>
+                    <th>Control</th>
+                    <th>Monitor</th>
+                    <th>Command</th>
+                </tr>            
+            </table>
+        </div>
+
+        <script>
+
+            var mapping = []; // Array of objects describing mappings
+
+            if (!navigator.requestMIDIAccess)
+            {
+                var content = document.getElementById("content");
+                content.innerHTML = "Your web browser does not support the WebMIDI standard. Try using the latest version of the Chrome or Opera browsers.";
+            }
+
+            navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
+
+            function onMIDISuccess(midiAccess) {
+                midiAccess.addEventListener("statechange", function(event) {
+                    console.log("Device updated: " + event.port.name + " [" + event.port.type + "] " + event.port.state);
+                    openMIDIDevices(midiAccess);
+                    updateMIDIMapperTable(midiAccess);
+                });
+
+                openMIDIDevices(midiAccess);
+                updateMIDIMapperTable(midiAccess);
+            }
+
+            function onMIDIFailure() {
+                console.log("Could not access MIDI devices");
+            }
+
+            function openMIDIDevices(midiAccess)
+            {
+                var ports = midiAccess.inputs;
+                ports.forEach(function(port, key) {
+                    if (port.connection !== "open")
+                    {
+                        console.log("Adding event listener for port: " + port.name);
+                        port.open();
+                        port.onmidimessage = function(event) {
+                            midiMessageReceived(port, event)
+                        };
+                    }
+                });
+                ports = midiAccess.outputs;
+                ports.forEach(function(port, key) {
+                    if (port.connection !== "open")
+                        port.open();
+                });
+            }
+
+            function midiMessageReceived(port, event)
+            {
+                var timestamp = event.timeStamp;
+                var channel = event.data[0] & 0x0f;
+                var command = event.data[0] >> 4;
+            }
+
+            function updateMIDIMapperTable(midiAccess)
+            {
+                var table = document.getElementById("midiMapperTable");              
+                var row = table.insertRow(1); 
+                var c, l, s, t, i, d, d2, b;
+                
+                for (i=table.rows.length-1; i>1; i--) table.deleteRow(i);
+
+                // Enable checkbox
+                c = row.insertCell(-1); 
+                c.style.textAlign = "center";
+                c.style.alignContent = "center";
+                l = document.createElement("label"); l.className = "check";
+                i = document.createElement("input"); i.type = "checkbox"; 
+                s = document.createElement("span"); s.className = "checkmark";
+                l.appendChild(i);
+                l.appendChild(s);
+                c.appendChild(l);
+
+                // Input device dropdown
+                c = row.insertCell(-1); 
+                d = document.createElement("div");
+                c.appendChild(d);
+                b = document.createElement("button");
+                d.appendChild(b);
+                d2 = document.createElement("div");
+                d.appendChild(d2);
+                midiAccess.inputs.forEach(function(port, key) {
+                    
+                });
+
+                l = 
+
+                // Input channel dropdown
+                c = row.insertCell(-1); 
+                c.style.textAlign = "center";
+                t = document.createTextNode("Yo!");
+                c.appendChild(t);
+
+                // Input control dropdown
+                c = row.insertCell(-1); 
+
+                // Output device dropdown
+                c = row.insertCell(-1); 
+
+                // Output channel dropdown
+                c = row.insertCell(-1); 
+
+                // Output control dropdown
+                c = row.insertCell(-1); 
+
+                // Monitor
+                c = row.insertCell(-1); 
+
+                // Command = Learn
+                c = row.insertCell(-1); 
+            }
+
+        </script>
+
+        <!-- For www.waveformer.net <script>includeHTML();</script> -->
+    </body>
+</html>
