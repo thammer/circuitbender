@@ -177,6 +177,7 @@
 
             function sendCC(port, channel, controllerNumber, controllerValue)
             {
+                console.log("Sending CC: channel: " + channel + " CC number: " + controllerNumber + " CC value: " + controllerValue);
                 port.send([0b10110000 + channel, controllerNumber, controllerValue]);
             }
 
@@ -231,11 +232,11 @@
                     return;
 
                 var mapping = false;
-                console.log(port.id + " " + channel + " " + command + " " + event.data[1]);
+                console.log("Received message: " + "Port: " + port.id + " Channel: " + channel + " Command: " + command + " Data[1]: " + event.data[1] +
+                    " Data[2]: " + event.data[2]);
                 for (let i=0; i<mappings.length; i++)
                 {
                     let map = mappings[i];
-                    console.log(map);
                     if (map.input.deviceId == port.id && map.input.channel == channel && command == 11 && 
                         map.input.CC == event.data[1]) {
                         mapping = map;
@@ -243,19 +244,15 @@
                     }                    
                 }
                 if (mapping) {
-                    console.log("Found! " + mapping.output.deviceId);
                     if (mapping.enabled) {
                         var outputDevice = midiAccess.outputs.get(mapping.output.deviceId);
                         sendCC(outputDevice, mapping.output.channel, mapping.output.CC, event.data[2]);                    
                     }
-                } else {
-                    console.log(".");
                 }
             }
 
             function initSettings(midiAccess, settings)
             {
-                console.log("initSettings: " + settings);
                 settings.devices = [];
 
                 midiAccess.outputs.forEach(function(port, key) {
@@ -266,8 +263,9 @@
                     });
                     if (!matchingInputDeviceId) 
                         console.log("ERROR: Could not find a MIDI input with the name '" + port.name + "''");
+
                     var device = {
-                        enabled: port.name.match(/circuit/i),
+                        enabled: port.name.match(/circuit/i) !== null,
                         inputDeviceId: matchingInputDeviceId, 
                         outputDeviceId: port.id, 
                         synth1Channel: 0,
@@ -280,9 +278,8 @@
 
             function updateSettingsTable(midiAccess, settings)
             {
-                console.log("updateSettingsTable: " + settings);
                 var table = document.getElementById("settingsTable");              
-                for (i=table.rows.length-1; i>=2; i--) table.deleteRow(i);
+                for (let i=table.rows.length-1; i>=2; i--) table.deleteRow(i);
 
                 var deviceNumber = 0;
                 midiAccess.outputs.forEach(function(port, key) {
@@ -296,13 +293,19 @@
                     l = document.createElement("label"); l.className = "check"; l.textContent=port.name;
                     i = document.createElement("input"); i.type = "checkbox"; 
                     i.checked = deviceSettings.enabled;
+                    i.onchange = function(e) {
+                        deviceSettings.enabled = e.target.checked;
+                        updateMappings(midiAccess, mappings);
+                        updateMIDIMapperTables(midiAccess, settings);
+                    }; 
+
                     s = document.createElement("span"); s.className = "checkmark";
                     l.appendChild(i);
                     l.appendChild(s);
                     c.appendChild(l);
 
                     // Synth 1 Channel (1-15) dropdown
-                    c = row.insertCell(-1); c.class = "channelSelectColumn";1
+                    c = row.insertCell(-1); c.class = "channelSelectColumn";
                     s = document.createElement("select"); s.id = "synth1Channel"; s.className = "channelSelect";
                     c.appendChild(s);
                     for (var i=0; i<15; i++) {
@@ -311,6 +314,12 @@
                         o.value = i;
                         s.options.add(o);
                     }
+                    s.onchange = function(e) {
+                        console.log("Channel: " + e.target.value);
+                        deviceSettings.synth1Channel = parseInt(e.target.value);
+                        updateMappings(midiAccess, mappings);
+                        updateMIDIMapperTables(midiAccess, settings);
+                   };
                     s.selectedIndex = deviceSettings.synth1Channel;
 
                     // Synth 2 Channel (1-15) dropdown
@@ -323,6 +332,12 @@
                         o.value = i;
                         s.options.add(o);
                     }
+                    s.onchange = function(e) {
+                        console.log("Channel: " + e.target.value);
+                        deviceSettings.synth2Channel = parseInt(e.target.value);
+                        updateMappings(midiAccess, mappings);
+                        updateMIDIMapperTables(midiAccess, settings);
+                    };
                     s.selectedIndex = deviceSettings.synth2Channel;
 
                     // Drum Channel (1-15) dropdown
@@ -335,6 +350,12 @@
                         o.value = i;
                         s.options.add(o);
                     }
+                    s.onchange = function(e) {
+                        console.log("Channel: " + e.target.value);
+                        deviceSettings.drumChannel = parseInt(e.target.value);
+                        updateMappings(midiAccess, mappings);
+                        updateMIDIMapperTables(midiAccess, settings);
+                    };
                     s.selectedIndex = deviceSettings.drumChannel;
 
                     deviceNumber++;
@@ -345,6 +366,7 @@
             {
                 // device, channel, cc/NRPN -> device, channel, CC/NRPN
                 mappings.length = 0;
+                mappingsEnableAll = false;
 
                 for (var i=0; i<settings.devices.length; i++)
                 {
@@ -375,17 +397,16 @@
                         mappings.push(mapping);
                     }
                 }
-                console.log(mappings);
             }
 
-            function clearAllMacros(midiAccess, device)
+            function clearAllMacros(midiAccess, outputDeviceId)
             {
-                console.log("Clearing macros");
+                console.log(outputDeviceId);
                 mappings.map(function(mapping) {
                     if (mapping.enabled) {
                         var macro = macroControls.findIndex(v => v == mapping.input.CC);
-                        console.log("Clearing synth " + (mapping.input.channel == device.synth1Channel ? 1 : 2) + " macro " + (macro + 1));
-                        var port = midiAccess.outputs.get(device.outputDeviceId);
+                        var port = midiAccess.outputs.get(outputDeviceId);
+                        console.log("Clearing " + port.id + " Channel: " + mapping.input.channel + " Macro: " + macro);
 
                         sendNRPN(port, mapping.input.channel, macroKnobs[macro].destinationA[0], macroKnobs[macro].destinationA[1], 0);
                         sendNRPN(port, mapping.input.channel, macroKnobs[macro].destinationB[0], macroKnobs[macro].destinationB[1], 0);
@@ -402,15 +423,17 @@
 
                 var row; 
                 var c, l, s, t, i, d, d2, b, th, tr;            
-                              
-                for (var i=0; i<settings.devices.length; i++)
+                    
+                console.log("Length: " + settings.devices.length);
+                for (var deviceIndex=0; deviceIndex<settings.devices.length; deviceIndex++)
                 {
-                    if (!settings.devices[i].enabled) {
+                    var device = settings.devices[deviceIndex];
+                    if (!device.enabled) {
+                        console.log("Skipping creation of table for device " + midiAccess.outputs.get(device.outputDeviceId).name);
                         continue;
                     }
 
-                    var device = settings.devices[i];
-
+                    console.log("Creating table for device " + midiAccess.outputs.get(device.outputDeviceId).name);
                     var table = document.createElement("table");
                     table.className = "midiMapperTable center";        
                     tables.appendChild(table);
@@ -432,57 +455,56 @@
                     th.appendChild(l);
                     tr.appendChild(th);
                     b = document.createElement("button"); b.textContent = "Clear all Macros";
+                    console.log("Device coming up");
+                    console.log(device);
+                    var outputDeviceId = device.outputDeviceId;
                     b.onclick = function(e) {
-                        clearAllMacros(midiAccess, device);
+                        clearAllMacros(midiAccess, outputDeviceId);
                     };
                     tr.appendChild(b);
                     table.appendChild(tr);
 
                     for (let mapping of mappings)
                     {
-                        console.log("X");
-                        console.log(mapping);
-                        if (mapping.output.deviceId != device.outputDeviceId)
-                            continue;
-                        console.log("Y");
-
-                        var row = table.insertRow(-1); 
-
-                        // Input control
-                        c = row.insertCell(-1); 
-                        l = document.createElement("label"); l.className = "check"; 
-                        var macro = macroControls.findIndex(v => v == mapping.input.CC) + 1;
-                        l.textContent = "Synth " + (mapping.input.channel == device.synth1Channel ? 1 : 2) + " Macro " + macro; 
-                        i = document.createElement("input"); i.type = "checkbox"; 
-                        i.checked = mapping.enabled;
-                        i.onchange = function(e) {
-                            console.log(e.target.checked);
-                            mapping.enabled = e.target.checked;
+                        if (mapping.output.deviceId == device.outputDeviceId) {
+                            var row = table.insertRow(-1); 
+    
+                            // Input control
+                            c = row.insertCell(-1); 
+                            l = document.createElement("label"); l.className = "check"; 
+                            var macro = macroControls.findIndex(v => v == mapping.input.CC) + 1;
+                            l.textContent = "Synth " + (mapping.input.channel == device.synth1Channel ? 1 : 2) + " Macro " + macro; 
+                            i = document.createElement("input"); i.type = "checkbox"; 
+                            i.checked = mapping.enabled;
+                            i.onchange = function(e) {
+                                mapping.enabled = e.target.checked;
+                            }
+                            s = document.createElement("span"); s.className = "checkmark";
+                            c.className = mapping.input.channel == device.synth1Channel ? "synth1LightColor" : "synth2LightColor";
+                            l.appendChild(i);
+                            l.appendChild(s);
+                            c.appendChild(l);
+    
+                            // arrow
+                            c = row.insertCell(-1); 
+                            c.style.textAlign = "center";
+                            t = document.createTextNode("\u21FE");
+                            c.appendChild(t);
+    
+                            // Output parameter
+                            c = row.insertCell(-1); 
+                            var parameter = parameters.find(e => e.CC == mapping.output.CC);
+                            t = document.createTextNode(parameter.name);
+                            c.className = parameter.color;
+                            c.appendChild(t);
+    
+                            // Command = Learn
+                            c = row.insertCell(-1); 
+                            b = document.createElement("button"); b.textContent = "Learn";
+                            c.appendChild(b);
                         }
-                        s = document.createElement("span"); s.className = "checkmark";
-                        c.className = mapping.input.channel == device.synth1Channel ? "synth1LightColor" : "synth2LightColor";
-                        l.appendChild(i);
-                        l.appendChild(s);
-                        c.appendChild(l);
-
-                        // arrow
-                        c = row.insertCell(-1); 
-                        c.style.textAlign = "center";
-                        t = document.createTextNode("\u21FE");
-                        c.appendChild(t);
-
-                        // Output parameter
-                        c = row.insertCell(-1); 
-                        var parameter = parameters.find(e => e.CC == mapping.output.CC);
-                        t = document.createTextNode(parameter.name);
-                        c.className = parameter.color;
-                        c.appendChild(t);
-
-                        // Command = Learn
-                        c = row.insertCell(-1); 
-                        b = document.createElement("button"); b.textContent = "Learn";
-                        c.appendChild(b);
                     }
+                    console.log("Done creating table for device " + midiAccess.outputs.get(device.outputDeviceId).name);
                 }
             }
 

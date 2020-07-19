@@ -77,6 +77,7 @@ table.midiMapperTable {
     text-align: left;
     vertical-align: middle;
     table-layout: auto;
+    margin-bottom: 10px;
 } 
 table.midiMapperTable tr {
     border: 1px solid black;
