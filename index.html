@@ -30,10 +30,69 @@
 
             var mappings = []; // Array of objects describing mappings 
                                 // deviceId, channel, cc/NRPN -> deviceId, channel, CC/NRPN
+            var mappingsEnableAll = false;
             var settings = {
                 // devices: [] // enabled, inputDeviceId, synth 1 channel, synth 2 channel, drum channel
             };
             var macroControls = [ 80, 81, 82, 83, 84, 85, 86, 87 ]; // CC numbers for each (0-based index) macro
+            var macroKnobs = [
+                {
+                    position: 80,
+                    destinationA: [ 3, 0], 
+                    destinationB: [ 3, 4], 
+                    destinationC: [ 3, 8], 
+                    destinationD: [ 3, 12], 
+                },
+                {
+                    position: 81,
+                    destinationA: [ 3, 16], 
+                    destinationB: [ 3, 20], 
+                    destinationC: [ 3, 24], 
+                    destinationD: [ 3, 28], 
+                },
+                {
+                    position: 82,
+                    destinationA: [ 3, 32], 
+                    destinationB: [ 3, 36], 
+                    destinationC: [ 3, 40], 
+                    destinationD: [ 3, 44], 
+                },
+                {
+                    position: 83,
+                    destinationA: [ 3, 48], 
+                    destinationB: [ 3, 52], 
+                    destinationC: [ 3, 56], 
+                    destinationD: [ 3, 60], 
+                },
+                {
+                    position: 84,
+                    destinationA: [ 3, 64], 
+                    destinationB: [ 3, 68], 
+                    destinationC: [ 3, 72], 
+                    destinationD: [ 3, 76], 
+                },
+                {
+                    position: 85,
+                    destinationA: [ 3, 80], 
+                    destinationB: [ 3, 84], 
+                    destinationC: [ 3, 88], 
+                    destinationD: [ 3, 92], 
+                },
+                {
+                    position: 86,
+                    destinationA: [ 3, 96], 
+                    destinationB: [ 3, 100], 
+                    destinationC: [ 3, 104], 
+                    destinationD: [ 3, 108], 
+                },
+                {
+                    position: 87,
+                    destinationA: [ 3, 112], 
+                    destinationB: [ 3, 116], 
+                    destinationC: [ 3, 120], 
+                    destinationD: [ 3, 124], 
+                },
+            ];
 
             var parameters = [
                 {
@@ -185,8 +244,10 @@
                 }
                 if (mapping) {
                     console.log("Found! " + mapping.output.deviceId);
-                    var outputDevice = midiAccess.outputs.get(mapping.output.deviceId);
-                    sendCC(outputDevice, mapping.output.channel, mapping.output.CC, event.data[2]);                    
+                    if (mapping.enabled) {
+                        var outputDevice = midiAccess.outputs.get(mapping.output.deviceId);
+                        sendCC(outputDevice, mapping.output.channel, mapping.output.CC, event.data[2]);                    
+                    }
                 } else {
                     console.log(".");
                 }
@@ -295,7 +356,9 @@
 
                     for (let parameter of parameters)
                     {
+                        var outputChannel = parameter.channel == "drumChannel" ? device.drumChannel : parameter.channel;
                         var mapping = {
+                            enabled: false,
                             input: {
                                 deviceId: device.inputDeviceId,
                                 channel: parameter.defaultSynthControl == 1 ? device.synth1Channel : device.synth2Channel,
@@ -304,7 +367,7 @@
                             },
                             output: {
                                 deviceId: device.outputDeviceId,
-                                channel: parameter.channel,
+                                channel: outputChannel,
                                 type: "CC",
                                 CC: parameter.CC,
                             },
@@ -313,6 +376,23 @@
                     }
                 }
                 console.log(mappings);
+            }
+
+            function clearAllMacros(midiAccess, device)
+            {
+                console.log("Clearing macros");
+                mappings.map(function(mapping) {
+                    if (mapping.enabled) {
+                        var macro = macroControls.findIndex(v => v == mapping.input.CC);
+                        console.log("Clearing synth " + (mapping.input.channel == device.synth1Channel ? 1 : 2) + " macro " + (macro + 1));
+                        var port = midiAccess.outputs.get(device.outputDeviceId);
+
+                        sendNRPN(port, mapping.input.channel, macroKnobs[macro].destinationA[0], macroKnobs[macro].destinationA[1], 0);
+                        sendNRPN(port, mapping.input.channel, macroKnobs[macro].destinationB[0], macroKnobs[macro].destinationB[1], 0);
+                        sendNRPN(port, mapping.input.channel, macroKnobs[macro].destinationC[0], macroKnobs[macro].destinationC[1], 0);
+                        sendNRPN(port, mapping.input.channel, macroKnobs[macro].destinationD[0], macroKnobs[macro].destinationD[1], 0);
+                    }
+                });
             }
 
             function updateMIDIMapperTables(midiAccess, settings)
@@ -339,49 +419,48 @@
                     th = document.createElement("th"); th.colSpan = 3;
                     l = document.createElement("label"); l.className = "check"; 
                     l.textContent = "Mapping for " + midiAccess.outputs.get(device.outputDeviceId).name;
-                    i = document.createElement("input"); i.type = "checkbox"; 
+                    i = document.createElement("input"); i.type = "checkbox";
+                    i.checked = mappingsEnableAll;
+                    i.onchange = function(e) {
+                        mappingsEnableAll = e.target.checked;
+                        mappings.map(m => m.enabled = e.target.checked);
+                        updateMIDIMapperTables(midiAccess, settings);
+                    }; 
                     s = document.createElement("span"); s.className = "checkmark";
                     l.appendChild(i);
                     l.appendChild(s);
                     th.appendChild(l);
-                    //th.textContent = "Mapping for " + midiAccess.outputs.get(device.outputDeviceId).name;
                     tr.appendChild(th);
                     b = document.createElement("button"); b.textContent = "Clear all Macros";
+                    b.onclick = function(e) {
+                        clearAllMacros(midiAccess, device);
+                    };
                     tr.appendChild(b);
                     table.appendChild(tr);
 
-                    // tr = document.createElement("tr"); ;
-                    // th = document.createElement("th"); 
-                    // b = document.createElement("button"); b.textContent = "Clear all Macros";
-                    // th.appendChild(b);
-                    // tr.appendChild(th);
-                    // th.appendChild(l);
-
-
-                    // tr = document.createElement("tr");
-                    // th = document.createElement("th"); th.textContent = "Control"
-                    // tr.appendChild(th);
-                    // table.appendChild(tr);
-
-                    // th = document.createElement("th");
-                    // tr.appendChild(th);
-
-                    // th = document.createElement("th"); th.textContent = "Parameter"
-                    // tr.appendChild(th);
-
-                    // th = document.createElement("th"); th.textContent = "Command"
-                    // tr.appendChild(th);
-
-                    for (let parameter of parameters)
+                    for (let mapping of mappings)
                     {
+                        console.log("X");
+                        console.log(mapping);
+                        if (mapping.output.deviceId != device.outputDeviceId)
+                            continue;
+                        console.log("Y");
+
                         var row = table.insertRow(-1); 
 
                         // Input control
                         c = row.insertCell(-1); 
                         l = document.createElement("label"); l.className = "check"; 
-                        l.textContent = "Synth " + parameter.defaultSynthControl + " Macro " + parameter.defaultMacro;
+                        var macro = macroControls.findIndex(v => v == mapping.input.CC) + 1;
+                        l.textContent = "Synth " + (mapping.input.channel == device.synth1Channel ? 1 : 2) + " Macro " + macro; 
                         i = document.createElement("input"); i.type = "checkbox"; 
+                        i.checked = mapping.enabled;
+                        i.onchange = function(e) {
+                            console.log(e.target.checked);
+                            mapping.enabled = e.target.checked;
+                        }
                         s = document.createElement("span"); s.className = "checkmark";
+                        c.className = mapping.input.channel == device.synth1Channel ? "synth1LightColor" : "synth2LightColor";
                         l.appendChild(i);
                         l.appendChild(s);
                         c.appendChild(l);
@@ -394,14 +473,14 @@
 
                         // Output parameter
                         c = row.insertCell(-1); 
+                        var parameter = parameters.find(e => e.CC == mapping.output.CC);
                         t = document.createTextNode(parameter.name);
+                        c.className = parameter.color;
                         c.appendChild(t);
 
                         // Command = Learn
                         c = row.insertCell(-1); 
                         b = document.createElement("button"); b.textContent = "Learn";
-                        c.appendChild(b);
-                        b = document.createElement("button"); b.textContent = "Clear Macro";
                         c.appendChild(b);
                     }
                 }

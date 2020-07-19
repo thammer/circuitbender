@@ -173,5 +173,26 @@
                         t = document.createTextNode(midiAccess.outputs.get(device.outputDeviceId).name);
                         c.appendChild(t);
 
+                    // tr = document.createElement("tr"); ;
+                    // th = document.createElement("th"); 
+                    // b = document.createElement("button"); b.textContent = "Clear all Macros";
+                    // th.appendChild(b);
+                    // tr.appendChild(th);
+                    // th.appendChild(l);
+
+
+                    // tr = document.createElement("tr");
+                    // th = document.createElement("th"); th.textContent = "Control"
+                    // tr.appendChild(th);
+                    // table.appendChild(tr);
+
+                    // th = document.createElement("th");
+                    // tr.appendChild(th);
+
+                    // th = document.createElement("th"); th.textContent = "Parameter"
+                    // tr.appendChild(th);
+
+                    // th = document.createElement("th"); th.textContent = "Command"
+                    // tr.appendChild(th);
 
 
