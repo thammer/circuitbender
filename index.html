@@ -7,54 +7,136 @@
         <!-- For www.waveformer.net <link rel="stylesheet" type="text/css" href="../common.css"/> -->
         <!-- For www.waveformer.net <link rel="stylesheet" type="text/css" href="../navbar.css"/>  -->
         <style>
+            :root {
+                --synth1-normal-color: #BD51D4;
+                --synth1-light-color: #C37CD3;
+                --synth2-normal-color: #009C8C;
+                --synth2-light-color: #5A9991;
+                --drum-normal-color: #F09932;
+                --drum-light-color: #EFC18D;
+                --background-normal-color: #BBB;
+                --background-light-color: #DDD;
+            }
             body {
                 font-family: 'Roboto', sans-serif;
             }
             h1 
             {
                 text-align: center;
-                margin: 5px 2px 0px 2px;
+                margin: 5px 2px 10px 2px;
             }
-            table#midiMapperTable {
+            table.center {
+                margin-left: auto;
+                margin-right: auto;
+            }
+            table tr#title {
+                background-color: #777;
+                color: #FFF;
+            }
+            table#settingsTable {
                 border: 1px solid black;
                 border-collapse: collapse;
-                text-align: center;
+                text-align: left;
                 vertical-align: middle;
                 table-layout: auto;
-                width: calc(100% - 8px);
-                margin: 4px 2px 2px 4px
+                margin-bottom: 15px;
             } 
-            table#midiMapperTable tr {
+            table#settingsTable th {
+                border-collapse: collapse;
+                padding: 4px;
+            } 
+            table#settingsTable td {
+                border-collapse: collapse;
+                padding: 4px;
+            } 
+            table#settingsTable tr#heading th:nth-child(1) {
+                background-color: var(--background-normal-color);
+            }
+            table#settingsTable td:nth-child(1) {
+                background-color: var(--background-light-color);
+            }
+            table#settingsTable tr#heading th:nth-child(2) {
+                background-color: var(--synth1-normal-color);
+            }
+            table#settingsTable td:nth-child(2) {
+                background-color: var(--synth1-light-color);
+            }
+            table#settingsTable tr#heading th:nth-child(3) {
+                background-color: var(--synth2-normal-color);
+            }
+            table#settingsTable td:nth-child(3) {
+                background-color: var(--synth2-light-color);
+            }
+            table#settingsTable tr#heading th:nth-child(4) {
+                background-color: var(--drum-normal-color);
+            }
+            table#settingsTable td:nth-child(4) {
+                background-color: var(--drum-light-color);
+            }
+            table#settingsTable .device  {
+                text-align: left;
+            }
+            table#settingsTable td {
+                text-align: center;
+            }
+
+            table.midiMapperTable {
+                border: 1px solid black;
+                border-collapse: collapse;
+                text-align: left;
+                vertical-align: middle;
+                table-layout: auto;
+            } 
+            table.midiMapperTable tr {
                 border: 1px solid black;
                 border-collapse: collapse;
             } 
-            table#midiMapperTable td, table#midiMapperTable th {
+            table.midiMapperTable tr.mappingTitle {
+                background-color: #777;
+                color: #FFF;
+            }
+            table.midiMapperTable tr.mappingTitle th {
+                padding: 4px;
+            }
+            table.midiMapperTable td.synth1LightColor {
+                background-color: var(--synth1-light-color);
+            }
+            table.midiMapperTable td.synth2LightColor {
+                background-color: var(--synth2-light-color);
+            }
+            table.midiMapperTable td.drumLightColor {
+                background-color: var(--drum-light-color);
+            }
+            table.midiMapperTable td.backgroundLightColor {
+                background-color: var(--background-light-color);
+            }
+            table.midiMapperTable td, table#midiMapperTable th {
                 border: 1px solid black;
                 border-collapse: collapse;
                 white-space: nowrap;
                 padding: 1px 4px 1px 4px;
             } 
-
-            table#midiMapperTable td {
-                text-align: left;
-            }
-
-            table#midiMapperTable td#value {
+            table.midiMapperTable td#value {
                 background-image: linear-gradient(to right, rgb(240, 240, 240) 0%, rgb(180, 180, 180) 100%);
                 background-repeat: no-repeat; 
             }
 
             .check {
+                display: block;
                 position: relative;
-                padding-left: 10px;
+                padding-left: 28px;
+                padding-right: 5px;
                 cursor: pointer;
                 -webkit-user-select: none;
                 -moz-user-select: none;
                 -ms-user-select: none;
                 user-select: none;
             }
+            .alone {
+                padding-left: 9px;
+            }
             .check input {
-                position: absolute;
+                position: relative;
                 opacity: 0;
                 cursor: pointer;
                 height: 0;
@@ -69,13 +151,13 @@
                 background-color: #eee;
                 border: 1px solid #999;
                 margin-top: 1px;
-                margin-left: -4px;
+                margin-left: 2px;
             }
             .check:hover input ~ .checkmark {
                 background-color: #ccc;
             }
             .check input:checked ~ .checkmark {
-                background-color: #3a3;
+                background-color: #FFF;
             }
             .checkmark:after {
                 content: "";
@@ -90,7 +172,7 @@
                 top: 1px;
                 width: 5px;
                 height: 8px;
-                border: solid white;
+                border: solid #555;
                 border-width: 0 3px 3px 0;
                 -webkit-transform: rotate(45deg);
                 -ms-transform: rotate(45deg);
@@ -101,24 +183,95 @@
     <body>
         <h1>Waveformer's Circuit Bender</h1>
         <div id=content">
-            <table id="midiMapperTable">
-                <tr>
-                    <th>Enable</th>
-                    <th>Input device</th>
-                    <th>Channel</th>
-                    <th>Control</th>
-                    <th>Output device</th>
-                    <th>Channel</th>
-                    <th>Control</th>
-                    <th>Monitor</th>
-                    <th>Command</th>
-                </tr>            
+            <table id="settingsTable" class="center">
+                <tr id="title">
+                    <th colspan="4">Settings</th>
+                </tr>
+                <tr id="heading">
+                    <th>Device</th>
+                    <th>Synth 1 MIDI Channel</th>
+                    <th>Synth 2 MIDI Channel</th>
+                    <th>Drums MIDI Channel</th>
+                </tr>
             </table>
+
+            <div id="midiMapperTables"></div>
         </div>
 
         <script>
 
-            var mapping = []; // Array of objects describing mappings
+            var mappings = []; // Array of objects describing mappings 
+                                // deviceId, channel, cc/NRPN -> deviceId, channel, CC/NRPN
+            var settings = {
+                // devices: [] // enabled, inputDeviceId, synth 1 channel, synth 2 channel, drum channel
+            };
+            var macroControls = [ 80, 81, 82, 83, 84, 85, 86, 87 ]; // CC numbers for each (0-based index) macro
+
+            var parameters = [
+                {
+                    name: "Synth 1 pan",
+                    type: "CC",
+                    CC: 117,
+                    channel: 15,
+                    color: "synth1LightColor",
+                    defaultMacro: 7,
+                    defaultSynthControl: 1,
+                },
+                {
+                    name: "Synth 2 pan",
+                    type: "CC",
+                    CC: 118,
+                    channel: 15,
+                    color: "synth2LightColor",
+                    defaultMacro: 7,
+                    defaultSynthControl: 2,
+                },
+                {
+                    name: "Drum 1 pan",
+                    type: "CC",
+                    CC: 77,
+                    channel: "drumChannel",
+                    color: "drumLightColor",
+                    defaultMacro: 6,
+                    defaultSynthControl: 1,
+                },
+                {
+                    name: "Drum 2 pan",
+                    type: "CC",
+                    CC: 78,
+                    channel: "drumChannel",
+                    color: "drumLightColor",
+                    defaultMacro: 5,
+                    defaultSynthControl: 1,
+                },
+                {
+                    name: "Drum 3 pan",
+                    type: "CC",
+                    CC: 79,
+                    channel: "drumChannel",
+                    color: "drumLightColor",
+                    defaultMacro: 6,
+                    defaultSynthControl: 2,
+                },
+                {
+                    name: "Drum 4 pan",
+                    type: "CC",
+                    CC: 80,
+                    channel: "drumChannel",
+                    color: "drumLightColor",
+                    defaultMacro: 5,
+                    defaultSynthControl: 2,
+                },
+                {
+                    name: "Master filter resonance",
+                    type: "CC",
+                    CC: 71,
+                    channel: 15,
+                    color: "backgroundLightColor",
+                    defaultMacro: 8,
+                    defaultSynthControl: 1,
+                },
+            ];
 
             if (!navigator.requestMIDIAccess)
             {
@@ -128,15 +281,33 @@
 
             navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
 
+            function sendNRPN(port, channel, msb, lsb, data)
+            {
+                sendCC(port, channel, 99, msb);
+                sendCC(port, channel, 98, lsb);
+                sendCC(port, channel, 6, data);
+            }
+
+            function sendCC(port, channel, controllerNumber, controllerValue)
+            {
+                port.send([0b10110000 + channel, controllerNumber, controllerValue]);
+            }
+
             function onMIDISuccess(midiAccess) {
                 midiAccess.addEventListener("statechange", function(event) {
                     console.log("Device updated: " + event.port.name + " [" + event.port.type + "] " + event.port.state);
                     openMIDIDevices(midiAccess);
-                    updateMIDIMapperTable(midiAccess);
+                    initSettings(midiAccess, settings);
+                    updateSettingsTable(midiAccess, settings);
+                    updateMappings(midiAccess, mappings);
+                    updateMIDIMapperTables(midiAccess, settings);
                 });
 
                 openMIDIDevices(midiAccess);
-                updateMIDIMapperTable(midiAccess);
+                initSettings(midiAccess, settings);
+                updateSettingsTable(midiAccess, settings);
+                updateMappings(midiAccess, mappings);
+                updateMIDIMapperTables(midiAccess, settings);
             }
 
             function onMIDIFailure() {
@@ -152,7 +323,7 @@
                         console.log("Adding event listener for port: " + port.name);
                         port.open();
                         port.onmidimessage = function(event) {
-                            midiMessageReceived(port, event)
+                            midiMessageReceived(midiAccess, port, event)
                         };
                     }
                 });
@@ -163,69 +334,249 @@
                 });
             }
 
-            function midiMessageReceived(port, event)
+            function midiMessageReceived(midiAccess, port, event)
             {
                 var timestamp = event.timeStamp;
                 var channel = event.data[0] & 0x0f;
                 var command = event.data[0] >> 4;
+
+                if (command == 15) // System Common or System Real-Time Messages
+                    return;
+
+                var mapping = false;
+                console.log(port.id + " " + channel + " " + command + " " + event.data[1]);
+                for (let i=0; i<mappings.length; i++)
+                {
+                    let map = mappings[i];
+                    console.log(map);
+                    if (map.input.deviceId == port.id && map.input.channel == channel && command == 11 && 
+                        map.input.CC == event.data[1]) {
+                        mapping = map;
+                        break;
+                    }                    
+                }
+                if (mapping) {
+                    console.log("Found! " + mapping.output.deviceId);
+                    var outputDevice = midiAccess.outputs.get(mapping.output.deviceId);
+                    sendCC(outputDevice, mapping.output.channel, mapping.output.CC, event.data[2]);                    
+                } else {
+                    console.log(".");
+                }
             }
 
-            function updateMIDIMapperTable(midiAccess)
+            function initSettings(midiAccess, settings)
             {
-                var table = document.getElementById("midiMapperTable");              
-                var row = table.insertRow(1); 
-                var c, l, s, t, i, d, d2, b;
-                
-                for (i=table.rows.length-1; i>1; i--) table.deleteRow(i);
+                console.log("initSettings: " + settings);
+                settings.devices = [];
 
-                // Enable checkbox
-                c = row.insertCell(-1); 
-                c.style.textAlign = "center";
-                c.style.alignContent = "center";
-                l = document.createElement("label"); l.className = "check";
-                i = document.createElement("input"); i.type = "checkbox"; 
-                s = document.createElement("span"); s.className = "checkmark";
-                l.appendChild(i);
-                l.appendChild(s);
-                c.appendChild(l);
-
-                // Input device dropdown
-                c = row.insertCell(-1); 
-                d = document.createElement("div");
-                c.appendChild(d);
-                b = document.createElement("button");
-                d.appendChild(b);
-                d2 = document.createElement("div");
-                d.appendChild(d2);
-                midiAccess.inputs.forEach(function(port, key) {
-                    
+                midiAccess.outputs.forEach(function(port, key) {
+                    var matchingInputDeviceId = false;
+                    midiAccess.inputs.forEach(function(inputPort, key) {
+                        if (inputPort.name == port.name)
+                            matchingInputDeviceId = inputPort.id;
+                    });
+                    if (!matchingInputDeviceId) 
+                        console.log("ERROR: Could not find a MIDI input with the name '" + port.name + "''");
+                    var device = {
+                        enabled: port.name.match(/circuit/i),
+                        inputDeviceId: matchingInputDeviceId, 
+                        outputDeviceId: port.id, 
+                        synth1Channel: 0,
+                        synth2Channel: 1,
+                        drumChannel: 9
+                    };
+                    settings.devices.push(device);
                 });
+            }
 
-                l = 
+            function updateSettingsTable(midiAccess, settings)
+            {
+                console.log("updateSettingsTable: " + settings);
+                var table = document.getElementById("settingsTable");              
+                for (i=table.rows.length-1; i>=2; i--) table.deleteRow(i);
 
-                // Input channel dropdown
-                c = row.insertCell(-1); 
-                c.style.textAlign = "center";
-                t = document.createTextNode("Yo!");
-                c.appendChild(t);
+                var deviceNumber = 0;
+                midiAccess.outputs.forEach(function(port, key) {
+                    var deviceSettings = settings.devices[deviceNumber];
 
-                // Input control dropdown
-                c = row.insertCell(-1); 
+                    var row = table.insertRow(-1);
+                    var c, t, l, i, s, o, d;
 
-                // Output device dropdown
-                c = row.insertCell(-1); 
+                    // Device name
+                    c = row.insertCell(-1); c.className = "device";
+                    l = document.createElement("label"); l.className = "check"; l.textContent=port.name;
+                    i = document.createElement("input"); i.type = "checkbox"; 
+                    i.checked = deviceSettings.enabled;
+                    s = document.createElement("span"); s.className = "checkmark";
+                    l.appendChild(i);
+                    l.appendChild(s);
+                    c.appendChild(l);
 
-                // Output channel dropdown
-                c = row.insertCell(-1); 
+                    // Synth 1 Channel (1-15) dropdown
+                    c = row.insertCell(-1); c.class = "channelSelectColumn";1
+                    s = document.createElement("select"); s.id = "synth1Channel"; s.className = "channelSelect";
+                    c.appendChild(s);
+                    for (var i=0; i<15; i++) {
+                        o = document.createElement("option");
+                        o.text = i+1;
+                        o.value = i;
+                        s.options.add(o);
+                    }
+                    s.selectedIndex = deviceSettings.synth1Channel;
 
-                // Output control dropdown
-                c = row.insertCell(-1); 
+                    // Synth 2 Channel (1-15) dropdown
+                    c = row.insertCell(-1); c.class = "channelSelectColumn";1
+                    s = document.createElement("select"); s.id = "synth1Channel"; s.className = "channelSelect";
+                    c.appendChild(s);
+                    for (var i=0; i<15; i++) {
+                        o = document.createElement("option");
+                        o.text = i+1;
+                        o.value = i;
+                        s.options.add(o);
+                    }
+                    s.selectedIndex = deviceSettings.synth2Channel;
 
-                // Monitor
-                c = row.insertCell(-1); 
+                    // Drum Channel (1-15) dropdown
+                    c = row.insertCell(-1); c.class = "channelSelectColumn";1
+                    s = document.createElement("select"); s.id = "synth1Channel"; s.className = "channelSelect";
+                    c.appendChild(s);
+                    for (var i=0; i<15; i++) {
+                        o = document.createElement("option");
+                        o.text = i+1;
+                        o.value = i;
+                        s.options.add(o);
+                    }
+                    s.selectedIndex = deviceSettings.drumChannel;
 
-                // Command = Learn
-                c = row.insertCell(-1); 
+                    deviceNumber++;
+                });
+            }
+
+            function updateMappings(midiAccess, mappings)
+            {
+                // device, channel, cc/NRPN -> device, channel, CC/NRPN
+                mappings.length = 0;
+
+                for (var i=0; i<settings.devices.length; i++)
+                {
+                    if (!settings.devices[i].enabled) {
+                        continue;
+                    }
+                    
+                    var device = settings.devices[i];
+
+                    for (let parameter of parameters)
+                    {
+                        var mapping = {
+                            input: {
+                                deviceId: device.inputDeviceId,
+                                channel: parameter.defaultSynthControl == 1 ? device.synth1Channel : device.synth2Channel,
+                                type: "CC",
+                                CC: macroControls[parameter.defaultMacro - 1],
+                            },
+                            output: {
+                                deviceId: device.outputDeviceId,
+                                channel: parameter.channel,
+                                type: "CC",
+                                CC: parameter.CC,
+                            },
+                        };
+                        mappings.push(mapping);
+                    }
+                }
+                console.log(mappings);
+            }
+
+            function updateMIDIMapperTables(midiAccess, settings)
+            {
+                var tables = document.getElementById("midiMapperTables");
+                tables.innerHTML="";
+
+                var row; 
+                var c, l, s, t, i, d, d2, b, th, tr;            
+                              
+                for (var i=0; i<settings.devices.length; i++)
+                {
+                    if (!settings.devices[i].enabled) {
+                        continue;
+                    }
+
+                    var device = settings.devices[i];
+
+                    var table = document.createElement("table");
+                    table.className = "midiMapperTable center";        
+                    tables.appendChild(table);
+
+                    tr = document.createElement("tr"); tr.className = "mappingTitle";
+                    th = document.createElement("th"); th.colSpan = 3;
+                    l = document.createElement("label"); l.className = "check"; 
+                    l.textContent = "Mapping for " + midiAccess.outputs.get(device.outputDeviceId).name;
+                    i = document.createElement("input"); i.type = "checkbox"; 
+                    s = document.createElement("span"); s.className = "checkmark";
+                    l.appendChild(i);
+                    l.appendChild(s);
+                    th.appendChild(l);
+                    //th.textContent = "Mapping for " + midiAccess.outputs.get(device.outputDeviceId).name;
+                    tr.appendChild(th);
+                    b = document.createElement("button"); b.textContent = "Clear all Macros";
+                    tr.appendChild(b);
+                    table.appendChild(tr);
+
+                    // tr = document.createElement("tr"); ;
+                    // th = document.createElement("th"); 
+                    // b = document.createElement("button"); b.textContent = "Clear all Macros";
+                    // th.appendChild(b);
+                    // tr.appendChild(th);
+                    // th.appendChild(l);
+
+
+                    // tr = document.createElement("tr");
+                    // th = document.createElement("th"); th.textContent = "Control"
+                    // tr.appendChild(th);
+                    // table.appendChild(tr);
+
+                    // th = document.createElement("th");
+                    // tr.appendChild(th);
+
+                    // th = document.createElement("th"); th.textContent = "Parameter"
+                    // tr.appendChild(th);
+
+                    // th = document.createElement("th"); th.textContent = "Command"
+                    // tr.appendChild(th);
+
+                    for (let parameter of parameters)
+                    {
+                        var row = table.insertRow(-1); 
+
+                        // Input control
+                        c = row.insertCell(-1); 
+                        l = document.createElement("label"); l.className = "check"; 
+                        l.textContent = "Synth " + parameter.defaultSynthControl + " Macro " + parameter.defaultMacro;
+                        i = document.createElement("input"); i.type = "checkbox"; 
+                        s = document.createElement("span"); s.className = "checkmark";
+                        l.appendChild(i);
+                        l.appendChild(s);
+                        c.appendChild(l);
+
+                        // arrow
+                        c = row.insertCell(-1); 
+                        c.style.textAlign = "center";
+                        t = document.createTextNode("\u21FE");
+                        c.appendChild(t);
+
+                        // Output parameter
+                        c = row.insertCell(-1); 
+                        t = document.createTextNode(parameter.name);
+                        c.appendChild(t);
+
+                        // Command = Learn
+                        c = row.insertCell(-1); 
+                        b = document.createElement("button"); b.textContent = "Learn";
+                        c.appendChild(b);
+                        b = document.createElement("button"); b.textContent = "Clear Macro";
+                        c.appendChild(b);
+                    }
+                }
             }
 
         </script>

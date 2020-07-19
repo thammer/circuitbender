@@ -1,0 +1,177 @@
+            .channelSelect {
+                position: relative;
+            }
+            .channelSelect select {
+                display: none;
+            }
+            .channelSelect-selected {
+                background-color: #88D;
+            }
+            .channelSelect-selected:after {
+                position: absolute;
+                content: "";
+                top: 14px;
+                right: 10px;
+                width: 0;
+                height: 0;
+                border: 6px solid transparent;
+                border-color: #FFF transparent transparent transparent;
+            }
+            .channelSelect-selected.select-arrow-active:after {
+                border-color: transparent transparent #FFF transparent;
+                top: 7px;
+            }
+            .channelSelect-items div, .channelSelect-selected {
+                color: #FFF;
+                padding: 8px 16px;
+                border: 1px solid transparent;
+                border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent;
+                cursor: pointer;
+            }
+            .channelSelect-items {
+                position: absolute;
+                background-color: #88D;
+                top: 100%;
+                left: 0;
+                right: 0;
+                z-index: 99;
+            }
+            .channelSelect-hide {
+                display: none;
+            }
+            .channelSelect-items div:hover, .same-as-selected {
+                background-color: rgba(0, 0, 0, 0.1);
+            }
+
+
+                    // Channel (1-15) dropdown
+                    c = row.insertCell(-1);
+                    d = document.createElement("div"); d.className="channelSelect";
+                    c.appendChild(d);
+                    s = document.createElement("select"); s.id = "synth1Channel";
+                    d.appendChild(s);
+                    for (var i=0; i<14; i++) {
+                        o = document.createElement("option");
+                        o.text = i+1;
+                        o.value = i;
+                        s.options.add(o);
+                    }
+
+            .dropbtn {
+                background-color: #4CAF50;
+                color: white;
+                padding: 16px;
+                font-size: 16px;
+                border: none;
+                cursor: pointer;
+                display: none;
+            }
+            .dropdown {
+                position: relative;
+                display: inline-block;
+            }
+
+            .dropdown-content {
+                display: none;
+                position: absolute;
+                background-color: #f9f9f9;
+                min-width: 160px;
+                box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+                z-index: 1;
+            }
+
+            .dropdown-content a {
+                color: black;
+                padding: 12px 16px;
+                text-decoration: none;
+                display: block;
+            }
+
+            .dropdown-content a:hover {
+                background-color: #f1f1f1;
+            }
+
+            .dropdown:hover .dropdown-content {
+                display: block;
+            }
+
+            .dropdown:hover .dropbtn {
+                background-color: #3e8e41;
+            }                      
+
+                    // Channel (1-15) dropdown
+                    c = row.insertCell(-1);
+                    d = document.createElement("div"); d.className="dropdown";
+                    c.appendChild(d); 
+                    b = document.createElement("button"); b.className="dropbtn";
+                    t = document.createTextNode("Channel"); 
+                    b.appendChild(t);
+                    d.appendChild(b);
+                    d2 = document.createElement("div"); d2.className="dropdown-content";
+                    for (var i=0; i<14; i++) {
+                        a = document.createElement("a"); a.href = "#"; a.text = i+1;
+                        d2.appendChild(a);
+                    }
+                    d.appendChild(d2);
+
+                 <tr>
+                    <th>Input device</th>
+                    <th>Control</th>
+                    <th> </th>
+                    <th>Output device</th>
+                    <th>Control</th>
+                    <th>Command</th>
+                </tr>            
+
+                for (i=table.rows.length-1; i>=1; i--) table.deleteRow(i);
+
+                        // Input device dropdown
+                        c = row.insertCell(-1); 
+                        d = document.createElement("div");
+                        c.appendChild(d);
+                        b = document.createElement("button");
+                        d.appendChild(b);
+                        d2 = document.createElement("div");
+                        d.appendChild(d2);
+                        midiAccess.inputs.forEach(function(port, key) {
+                            
+                        });
+
+                        // Input channel dropdown
+                        c = row.insertCell(-1); 
+                        c.style.textAlign = "center";
+                        t = document.createTextNode("Yo!");
+                        c.appendChild(t);
+
+            <table id="midiMapperTable" class="center">
+                <tr id="mappingTitle">
+                    <th colspan="6">Mapping</th>
+                </tr>
+                <tr id="mapping-heading">
+                    <th>Input Device</th>
+                    <th>Control</th>
+                    <th></th>
+                    <th>Output Device</th>
+                    <th>Parameter</th>
+                    <th>Command</th>
+                </tr>
+            </table>
+
+
+                                                // Input device
+                        c = row.insertCell(-1); 
+                        l = document.createElement("label"); l.className = "check"; 
+                        l.textContent = midiAccess.inputs.get(device.inputDeviceId).name;
+                        i = document.createElement("input"); i.type = "checkbox"; 
+                        s = document.createElement("span"); s.className = "checkmark";
+                        l.appendChild(i);
+                        l.appendChild(s);
+                        c.appendChild(l);
+
+                        // Output device
+                        c = row.insertCell(-1); 
+                        t = document.createTextNode(midiAccess.outputs.get(device.outputDeviceId).name);
+                        c.appendChild(t);
+
+
+
