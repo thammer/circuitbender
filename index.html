@@ -235,6 +235,30 @@
                 let mapping = false;
                 console.log("Received message: " + "Port: " + port.id + " Channel: " + channel + " Command: " + command + " Data[1]: " + event.data[1] +
                     " Data[2]: " + event.data[2]);
+
+                if (midiLearnActive && command == 11) {
+                    midiLearnActive = false;
+                    let m = mappings.findIndex(mapping =>
+                        mapping.output.deviceId === midiLearnOutput.deviceId && 
+                        mapping.output.channel === midiLearnOutput.channel && 
+                        mapping.output.type === midiLearnOutput.type && 
+                        mapping.output.CC === midiLearnOutput.CC );
+                    if (m == -1) {
+                        console.log("Unknown mapping output");
+                        console.log(midiLearnOutput);
+                        return;
+                    } 
+                    mapping = mappings[m];
+                    mapping.input = {
+                        deviceId: port.id,
+                        channel: channel,
+                        type: "CC",
+                        CC: event.data[1],
+                    };
+                    updateMIDIMapperTables(midiAccess, settings);
+
+                    return;
+                }
                 for (let i=0; i<mappings.length; i++)
                 {
                     let map = mappings[i];
@@ -403,7 +427,7 @@
             function clearAllMacros(midiAccess, outputDeviceId)
             {
                 console.log(outputDeviceId);
-                mappings.map(function(mapping) {
+                mappings.forEach(function(mapping) {
                     if (mapping.enabled) {
                         let macro = macroControls.findIndex(v => v == mapping.input.CC);
                         let port = midiAccess.outputs.get(outputDeviceId);
@@ -447,7 +471,7 @@
                     i.checked = mappingsEnableAll;
                     i.onchange = function(e) {
                         mappingsEnableAll = e.target.checked;
-                        mappings.map(m => m.enabled = e.target.checked);
+                        mappings.forEach(m => m.enabled = e.target.checked);
                         updateMIDIMapperTables(midiAccess, settings);
                     }; 
                     s = document.createElement("span"); s.className = "checkmark";
@@ -503,10 +527,19 @@
                             c = row.insertCell(-1); 
                             b = document.createElement("button"); b.textContent = "Learn";
                             let outputDeviceId = device.outputDeviceId;
-                            let learningText = "Synth " + (mapping.input.channel == device.synth1Channel ? 1 : 2) + " Macro " + macro;
+                            let learningText = "Synth " + (mapping.output.channel == device.synth1Channel ? 1 : 2) + " Macro " + macro;
                             b.onclick = function(e) {
-                                console.log("Learning for mapping " + "Synth " + (mapping.input.channel == device.synth1Channel ? 1 : 2) + " Macro " + macro);
-                                console.log(mapping);
+                                console.log("Learning text: " + learningText);
+                                console.log("Learning for Device: " + mapping.output.deviceId + " Channel: " + mapping.output.channel + 
+                                    " CC: " + mapping.output.CC);
+                                console.log(mapping); 
+                                midiLearnOutput = { 
+                                    deviceId: mapping.output.deviceId,
+                                    channel: mapping.output.channel,
+                                    type: mapping.output.type,
+                                    CC: mapping.output.CC, 
+                                }
+                                midiLearnActive = true;
                             };
                             c.appendChild(b);
                         }
