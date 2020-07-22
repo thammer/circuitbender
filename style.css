@@ -47,7 +47,8 @@ table#settingsTable td:nth-child(1) {
     background-color: var(--background-light-color);
 }
 table#settingsTable tr#heading th:nth-child(2) {
-    background-color: var(--synth1-normal-color);
+    background-color: 
+    var(--synth1-normal-color);
 }
 table#settingsTable td:nth-child(2) {
     background-color: var(--synth1-light-color);
@@ -78,9 +79,9 @@ table.midiMapperTable {
     vertical-align: middle;
     table-layout: auto;
     margin-bottom: 10px;
+    border-radius: 10px;
 } 
 table.midiMapperTable tr {
-    border: 1px solid black;
     border-collapse: collapse;
 } 
 table.midiMapperTable tr.mappingTitle {
@@ -102,15 +103,32 @@ table.midiMapperTable td.drumLightColor {
 table.midiMapperTable td.backgroundLightColor {
     background-color: var(--background-light-color);
 }
-table.midiMapperTable td, table#midiMapperTable th {
-    border: 1px solid black;
+table.midiMapperTable td, table.midiMapperTable th {
     border-collapse: collapse;
     white-space: nowrap;
-    padding: 1px 4px 1px 4px;
+    padding: 4px 4px 4px 4px;
 } 
-table.midiMapperTable td#value {
+table.midiMapperTable td.value {
     background-image: linear-gradient(to right, rgb(240, 240, 240) 0%, rgb(180, 180, 180) 100%);
     background-repeat: no-repeat; 
+}
+table.midiMapperTable td.learn {
+    text-align: center;
+    background-color: #F5F5F5;
+}
+table.midiMapperTable td.arrow {
+    text-align: center;
+    background-color: #F5F5F5;
+}
+
+button.learnButton {
+    padding: 1px 6px 1px 6px;
+    margin: 0px;
+}
+
+button.clearMacrosButton {
+    padding: 2px;
+    margin: 2px;
 }
 
 .check {

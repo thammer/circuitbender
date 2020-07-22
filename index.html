@@ -447,7 +447,7 @@
                 tables.innerHTML="";
 
                 let row; 
-                let c, l, s, t, i, d, d2, b, th, tr;            
+                let c, l, s, t, i, d, d2, b, th, tr, td;            
                     
                 console.log("Length: " + settings.devices.length);
                 for (let deviceIndex=0; deviceIndex<settings.devices.length; deviceIndex++)
@@ -479,7 +479,7 @@
                     l.appendChild(s);
                     th.appendChild(l);
                     tr.appendChild(th);
-                    b = document.createElement("button"); b.textContent = "Clear all Macros";
+                    b = document.createElement("button"); b.textContent = "Clear all Macros"; b.className = "clearMacrosButton";
                     console.log("Device coming up");
                     console.log(device);
                     let outputDeviceId = device.outputDeviceId;
@@ -511,10 +511,10 @@
                             c.appendChild(l);
     
                             // arrow
-                            c = row.insertCell(-1); 
-                            c.style.textAlign = "center";
+                            td = document.createElement("td"); td.className = "arrow";
+                            row.appendChild(td);
                             t = document.createTextNode("\u21FE");
-                            c.appendChild(t);
+                            td.appendChild(t);
     
                             // Output parameter
                             c = row.insertCell(-1); 
@@ -524,8 +524,9 @@
                             c.appendChild(t);
     
                             // Command = Learn
-                            c = row.insertCell(-1); 
-                            b = document.createElement("button"); b.textContent = "Learn";
+                            td = document.createElement("td"); td.className = "learn";
+                            row.appendChild(td);
+                            b = document.createElement("button"); b.textContent = "Learn"; b.className = "learnButton";
                             let outputDeviceId = device.outputDeviceId;
                             let learningText = "Synth " + (mapping.output.channel == device.synth1Channel ? 1 : 2) + " Macro " + macro;
                             b.onclick = function(e) {
@@ -541,7 +542,7 @@
                                 }
                                 midiLearnActive = true;
                             };
-                            c.appendChild(b);
+                            td.appendChild(b);
                         }
                     }
                     console.log("Done creating table for device " + midiAccess.outputs.get(device.outputDeviceId).name);
