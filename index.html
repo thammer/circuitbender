@@ -27,15 +27,16 @@
         </div>
 
         <script>
-
-            var mappings = []; // Array of objects describing mappings 
+            let midiLearnActive = false;
+            let midiLearnOutput; // Struct of deviceId, Channel, Type = CC, CC
+            let mappings = []; // Array of objects describing mappings 
                                 // deviceId, channel, cc/NRPN -> deviceId, channel, CC/NRPN
-            var mappingsEnableAll = false;
-            var settings = {
+            let mappingsEnableAll = false;
+            let settings = {
                 // devices: [] // enabled, inputDeviceId, synth 1 channel, synth 2 channel, drum channel
             };
-            var macroControls = [ 80, 81, 82, 83, 84, 85, 86, 87 ]; // CC numbers for each (0-based index) macro
-            var macroKnobs = [
+            let macroControls = [ 80, 81, 82, 83, 84, 85, 86, 87 ]; // CC numbers for each (0-based index) macro
+            let macroKnobs = [
                 {
                     position: 80,
                     destinationA: [ 3, 0], 
@@ -94,7 +95,7 @@
                 },
             ];
 
-            var parameters = [
+            let parameters = [
                 {
                     name: "Synth 1 pan",
                     type: "CC",
@@ -162,7 +163,7 @@
 
             if (!navigator.requestMIDIAccess)
             {
-                var content = document.getElementById("content");
+                let content = document.getElementById("content");
                 content.innerHTML = "Your web browser does not support the WebMIDI standard. Try using the latest version of the Chrome or Opera browsers.";
             }
 
@@ -204,7 +205,7 @@
 
             function openMIDIDevices(midiAccess)
             {
-                var ports = midiAccess.inputs;
+                let ports = midiAccess.inputs;
                 ports.forEach(function(port, key) {
                     if (port.connection !== "open")
                     {
@@ -224,14 +225,14 @@
 
             function midiMessageReceived(midiAccess, port, event)
             {
-                var timestamp = event.timeStamp;
-                var channel = event.data[0] & 0x0f;
-                var command = event.data[0] >> 4;
+                let timestamp = event.timeStamp;
+                let channel = event.data[0] & 0x0f;
+                let command = event.data[0] >> 4;
 
                 if (command == 15) // System Common or System Real-Time Messages
                     return;
 
-                var mapping = false;
+                let mapping = false;
                 console.log("Received message: " + "Port: " + port.id + " Channel: " + channel + " Command: " + command + " Data[1]: " + event.data[1] +
                     " Data[2]: " + event.data[2]);
                 for (let i=0; i<mappings.length; i++)
@@ -245,7 +246,7 @@
                 }
                 if (mapping) {
                     if (mapping.enabled) {
-                        var outputDevice = midiAccess.outputs.get(mapping.output.deviceId);
+                        let outputDevice = midiAccess.outputs.get(mapping.output.deviceId);
                         sendCC(outputDevice, mapping.output.channel, mapping.output.CC, event.data[2]);                    
                     }
                 }
@@ -256,7 +257,7 @@
                 settings.devices = [];
 
                 midiAccess.outputs.forEach(function(port, key) {
-                    var matchingInputDeviceId = false;
+                    let matchingInputDeviceId = false;
                     midiAccess.inputs.forEach(function(inputPort, key) {
                         if (inputPort.name == port.name)
                             matchingInputDeviceId = inputPort.id;
@@ -264,7 +265,7 @@
                     if (!matchingInputDeviceId) 
                         console.log("ERROR: Could not find a MIDI input with the name '" + port.name + "''");
 
-                    var device = {
+                    let device = {
                         enabled: port.name.match(/circuit/i) !== null,
                         inputDeviceId: matchingInputDeviceId, 
                         outputDeviceId: port.id, 
@@ -278,15 +279,15 @@
 
             function updateSettingsTable(midiAccess, settings)
             {
-                var table = document.getElementById("settingsTable");              
+                let table = document.getElementById("settingsTable");              
                 for (let i=table.rows.length-1; i>=2; i--) table.deleteRow(i);
 
-                var deviceNumber = 0;
+                let deviceNumber = 0;
                 midiAccess.outputs.forEach(function(port, key) {
-                    var deviceSettings = settings.devices[deviceNumber];
+                    let deviceSettings = settings.devices[deviceNumber];
 
-                    var row = table.insertRow(-1);
-                    var c, t, l, i, s, o, d;
+                    let row = table.insertRow(-1);
+                    let c, t, l, i, s, o, d;
 
                     // Device name
                     c = row.insertCell(-1); c.className = "device";
@@ -308,7 +309,7 @@
                     c = row.insertCell(-1); c.class = "channelSelectColumn";
                     s = document.createElement("select"); s.id = "synth1Channel"; s.className = "channelSelect";
                     c.appendChild(s);
-                    for (var i=0; i<15; i++) {
+                    for (let i=0; i<15; i++) {
                         o = document.createElement("option");
                         o.text = i+1;
                         o.value = i;
@@ -326,7 +327,7 @@
                     c = row.insertCell(-1); c.class = "channelSelectColumn";1
                     s = document.createElement("select"); s.id = "synth1Channel"; s.className = "channelSelect";
                     c.appendChild(s);
-                    for (var i=0; i<15; i++) {
+                    for (let i=0; i<15; i++) {
                         o = document.createElement("option");
                         o.text = i+1;
                         o.value = i;
@@ -344,7 +345,7 @@
                     c = row.insertCell(-1); c.class = "channelSelectColumn";1
                     s = document.createElement("select"); s.id = "synth1Channel"; s.className = "channelSelect";
                     c.appendChild(s);
-                    for (var i=0; i<15; i++) {
+                    for (let i=0; i<15; i++) {
                         o = document.createElement("option");
                         o.text = i+1;
                         o.value = i;
@@ -368,18 +369,18 @@
                 mappings.length = 0;
                 mappingsEnableAll = false;
 
-                for (var i=0; i<settings.devices.length; i++)
+                for (let i=0; i<settings.devices.length; i++)
                 {
                     if (!settings.devices[i].enabled) {
                         continue;
                     }
                     
-                    var device = settings.devices[i];
+                    let device = settings.devices[i];
 
                     for (let parameter of parameters)
                     {
-                        var outputChannel = parameter.channel == "drumChannel" ? device.drumChannel : parameter.channel;
-                        var mapping = {
+                        let outputChannel = parameter.channel == "drumChannel" ? device.drumChannel : parameter.channel;
+                        let mapping = {
                             enabled: false,
                             input: {
                                 deviceId: device.inputDeviceId,
@@ -404,8 +405,8 @@
                 console.log(outputDeviceId);
                 mappings.map(function(mapping) {
                     if (mapping.enabled) {
-                        var macro = macroControls.findIndex(v => v == mapping.input.CC);
-                        var port = midiAccess.outputs.get(outputDeviceId);
+                        let macro = macroControls.findIndex(v => v == mapping.input.CC);
+                        let port = midiAccess.outputs.get(outputDeviceId);
                         console.log("Clearing " + port.id + " Channel: " + mapping.input.channel + " Macro: " + macro);
 
                         sendNRPN(port, mapping.input.channel, macroKnobs[macro].destinationA[0], macroKnobs[macro].destinationA[1], 0);
@@ -418,23 +419,23 @@
 
             function updateMIDIMapperTables(midiAccess, settings)
             {
-                var tables = document.getElementById("midiMapperTables");
+                let tables = document.getElementById("midiMapperTables");
                 tables.innerHTML="";
 
-                var row; 
-                var c, l, s, t, i, d, d2, b, th, tr;            
+                let row; 
+                let c, l, s, t, i, d, d2, b, th, tr;            
                     
                 console.log("Length: " + settings.devices.length);
-                for (var deviceIndex=0; deviceIndex<settings.devices.length; deviceIndex++)
+                for (let deviceIndex=0; deviceIndex<settings.devices.length; deviceIndex++)
                 {
-                    var device = settings.devices[deviceIndex];
+                    let device = settings.devices[deviceIndex];
                     if (!device.enabled) {
                         console.log("Skipping creation of table for device " + midiAccess.outputs.get(device.outputDeviceId).name);
                         continue;
                     }
 
                     console.log("Creating table for device " + midiAccess.outputs.get(device.outputDeviceId).name);
-                    var table = document.createElement("table");
+                    let table = document.createElement("table");
                     table.className = "midiMapperTable center";        
                     tables.appendChild(table);
 
@@ -457,7 +458,7 @@
                     b = document.createElement("button"); b.textContent = "Clear all Macros";
                     console.log("Device coming up");
                     console.log(device);
-                    var outputDeviceId = device.outputDeviceId;
+                    let outputDeviceId = device.outputDeviceId;
                     b.onclick = function(e) {
                         clearAllMacros(midiAccess, outputDeviceId);
                     };
@@ -467,12 +468,12 @@
                     for (let mapping of mappings)
                     {
                         if (mapping.output.deviceId == device.outputDeviceId) {
-                            var row = table.insertRow(-1); 
+                            let row = table.insertRow(-1); 
     
                             // Input control
                             c = row.insertCell(-1); 
                             l = document.createElement("label"); l.className = "check"; 
-                            var macro = macroControls.findIndex(v => v == mapping.input.CC) + 1;
+                            let macro = macroControls.findIndex(v => v == mapping.input.CC) + 1;
                             l.textContent = "Synth " + (mapping.input.channel == device.synth1Channel ? 1 : 2) + " Macro " + macro; 
                             i = document.createElement("input"); i.type = "checkbox"; 
                             i.checked = mapping.enabled;
@@ -493,7 +494,7 @@
     
                             // Output parameter
                             c = row.insertCell(-1); 
-                            var parameter = parameters.find(e => e.CC == mapping.output.CC);
+                            let parameter = parameters.find(e => e.CC == mapping.output.CC);
                             t = document.createTextNode(parameter.name);
                             c.className = parameter.color;
                             c.appendChild(t);
@@ -501,6 +502,12 @@
                             // Command = Learn
                             c = row.insertCell(-1); 
                             b = document.createElement("button"); b.textContent = "Learn";
+                            let outputDeviceId = device.outputDeviceId;
+                            let learningText = "Synth " + (mapping.input.channel == device.synth1Channel ? 1 : 2) + " Macro " + macro;
+                            b.onclick = function(e) {
+                                console.log("Learning for mapping " + "Synth " + (mapping.input.channel == device.synth1Channel ? 1 : 2) + " Macro " + macro);
+                                console.log(mapping);
+                            };
                             c.appendChild(b);
                         }
                     }
