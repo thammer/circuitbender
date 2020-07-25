@@ -30,6 +30,7 @@
 
         <script>
             let midiLearnActive = false;
+            let midiLearnButton;
             let midiLearnOutput; // Struct of deviceId, Channel, Type = CC, CC
             let mappings = []; // Array of objects describing mappings 
                                 // deviceId, channel, cc/NRPN -> deviceId, channel, CC/NRPN
@@ -239,6 +240,7 @@
 
                 if (midiLearnActive && command == 11) {
                     midiLearnActive = false;
+                    midiLearnButton.className = "learnButton learning"
                     let m = mappings.findIndex(mapping =>
                         mapping.output.deviceId === midiLearnOutput.deviceId && 
                         mapping.output.channel === midiLearnOutput.channel && 
@@ -260,6 +262,7 @@
 
                     return;
                 }
+                
                 for (let i=0; i<mappings.length; i++)
                 {
                     let map = mappings[i];
@@ -527,14 +530,23 @@
                             // Command = Learn
                             td = document.createElement("td"); td.className = "learn";
                             row.appendChild(td);
-                            b = document.createElement("button"); b.textContent = "Learn"; b.className = "learnButton";
+                            let lb = document.createElement("button"); lb.textContent = "Learn"; lb.className = "learnButton";
                             let outputDeviceId = device.outputDeviceId;
                             let learningText = "Synth " + (mapping.output.channel == device.synth1Channel ? 1 : 2) + " Macro " + macro;
-                            b.onclick = function(e) {
+                            lb.onclick = function(e) {
+                                if (midiLearnActive) {
+                                    midiLearnButton.className = "learnButton";
+                                    if (midiLearnButton === lb) {
+                                        midiLearnActive = false;
+                                        return; // abort learning
+                                    }
+                                }
                                 console.log("Learning text: " + learningText);
                                 console.log("Learning for Device: " + mapping.output.deviceId + " Channel: " + mapping.output.channel + 
                                     " CC: " + mapping.output.CC);
                                 console.log(mapping); 
+                                lb.className = "learnButton learning"
+                                midiLearnButton = lb;
                                 midiLearnOutput = { 
                                     deviceId: mapping.output.deviceId,
                                     channel: mapping.output.channel,
@@ -543,7 +555,7 @@
                                 }
                                 midiLearnActive = true;
                             };
-                            td.appendChild(b);
+                            td.appendChild(lb);
                         }
                     }
                     console.log("Done creating table for device " + midiAccess.outputs.get(device.outputDeviceId).name);

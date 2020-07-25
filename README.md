@@ -7,6 +7,8 @@ Novation Circuit hacks
 -v support drum panning, channel
 -v settings gui hookup
 -v learn buttons
+-v color midi learn button when learning
+- Display drum number instead of synth 2 when drum macro is learned
 - test with 2 circuits
 - pass mappings as parameter to functions, and settings, and get rid of other uses of global variables
 - optimize receiveMIDIMessage

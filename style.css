@@ -126,6 +126,10 @@ button.learnButton {
     margin: 0px;
 }
 
+button.learnButton.learning {
+    background-color: #99D3FF
+}
+
 button.clearMacrosButton {
     padding: 2px;
     margin: 2px;
