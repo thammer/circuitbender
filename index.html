@@ -430,7 +430,7 @@
                 console.log(outputDeviceId);
                 mappings.forEach(function(mapping) {
                     if (mapping.enabled) {
-                        let macro = macroKnobs.findIndex(v => v == mapping.input.CC);
+                        let macro = macroKnobs.findIndex(v => v.position == mapping.input.CC);
                         let port = midiAccess.outputs.get(outputDeviceId);
                         console.log("Clearing " + port.id + " Channel: " + mapping.input.channel + " Macro: " + macro);
 
@@ -498,7 +498,7 @@
                             // Input control
                             c = row.insertCell(-1); 
                             l = document.createElement("label"); l.className = "check"; 
-                            let macro = macroKnobs.findIndex(v => v == mapping.input.CC) + 1;
+                            let macro = macroKnobs.findIndex(v => v.position == mapping.input.CC) + 1;
                             l.textContent = "Synth " + (mapping.input.channel == device.synth1Channel ? 1 : 2) + " Macro " + macro; 
                             i = document.createElement("input"); i.type = "checkbox"; 
                             i.checked = mapping.enabled;
