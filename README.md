@@ -8,7 +8,6 @@ Novation Circuit hacks
 -v settings gui hookup
 -v learn buttons
 - test with 2 circuits
-- remove use of macroControls
 - pass mappings as parameter to functions, and settings, and get rid of other uses of global variables
 - optimize receiveMIDIMessage
 - javascript in separate file

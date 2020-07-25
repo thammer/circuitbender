@@ -35,7 +35,6 @@
             let settings = {
                 // devices: [] // enabled, inputDeviceId, synth 1 channel, synth 2 channel, drum channel
             };
-            let macroControls = [ 80, 81, 82, 83, 84, 85, 86, 87 ]; // CC numbers for each (0-based index) macro
             let macroKnobs = [
                 {
                     position: 80,
@@ -410,7 +409,7 @@
                                 deviceId: device.inputDeviceId,
                                 channel: parameter.defaultSynthControl == 1 ? device.synth1Channel : device.synth2Channel,
                                 type: "CC",
-                                CC: macroControls[parameter.defaultMacro - 1],
+                                CC: macroKnobs[parameter.defaultMacro - 1].position,
                             },
                             output: {
                                 deviceId: device.outputDeviceId,
@@ -429,7 +428,7 @@
                 console.log(outputDeviceId);
                 mappings.forEach(function(mapping) {
                     if (mapping.enabled) {
-                        let macro = macroControls.findIndex(v => v == mapping.input.CC);
+                        let macro = macroKnobs.findIndex(v => v == mapping.input.CC);
                         let port = midiAccess.outputs.get(outputDeviceId);
                         console.log("Clearing " + port.id + " Channel: " + mapping.input.channel + " Macro: " + macro);
 
@@ -497,7 +496,7 @@
                             // Input control
                             c = row.insertCell(-1); 
                             l = document.createElement("label"); l.className = "check"; 
-                            let macro = macroControls.findIndex(v => v == mapping.input.CC) + 1;
+                            let macro = macroKnobs.findIndex(v => v == mapping.input.CC) + 1;
                             l.textContent = "Synth " + (mapping.input.channel == device.synth1Channel ? 1 : 2) + " Macro " + macro; 
                             i = document.createElement("input"); i.type = "checkbox"; 
                             i.checked = mapping.enabled;
