@@ -181,7 +181,7 @@
 
             function sendCC(port, channel, controllerNumber, controllerValue)
             {
-                console.log("Sending CC: channel: " + channel + " CC number: " + controllerNumber + " CC value: " + controllerValue);
+                // console.log("Sending CC: channel: " + channel + " CC number: " + controllerNumber + " CC value: " + controllerValue);
                 port.send([0b10110000 + channel, controllerNumber, controllerValue]);
             }
 
@@ -236,8 +236,8 @@
                     return;
 
                 let mapping = false;
-                console.log("Received message: " + "Port: " + port.id + " Channel: " + channel + " Command: " + command + " Data[1]: " + event.data[1] +
-                    " Data[2]: " + event.data[2]);
+                // console.log("Received message: " + "Port: " + port.id + " Channel: " + channel + " Command: " + command + " Data[1]: " + event.data[1] +
+                //    " Data[2]: " + event.data[2]);
 
                 if (midiLearnActive && command == 11) {
                     midiLearnActive = false;
@@ -345,7 +345,6 @@
                         s.options.add(o);
                     }
                     s.onchange = function(e) {
-                        console.log("Channel: " + e.target.value);
                         deviceSettings.synth1Channel = parseInt(e.target.value);
                         updateMappings(midiAccess, mappings);
                         updateMIDIMapperTables(midiAccess, settings);
@@ -363,7 +362,6 @@
                         s.options.add(o);
                     }
                     s.onchange = function(e) {
-                        console.log("Channel: " + e.target.value);
                         deviceSettings.synth2Channel = parseInt(e.target.value);
                         updateMappings(midiAccess, mappings);
                         updateMIDIMapperTables(midiAccess, settings);
@@ -381,7 +379,6 @@
                         s.options.add(o);
                     }
                     s.onchange = function(e) {
-                        console.log("Channel: " + e.target.value);
                         deviceSettings.drumChannel = parseInt(e.target.value);
                         updateMappings(midiAccess, mappings);
                         updateMIDIMapperTables(midiAccess, settings);
@@ -431,7 +428,6 @@
 
             function clearAllMacros(midiAccess, outputDeviceId)
             {
-                console.log(outputDeviceId);
                 mappings.forEach(function(mapping) {
                     if (mapping.enabled) {
                         let macro = macroKnobs.findIndex(v => v.position == mapping.input.CC);
@@ -454,16 +450,13 @@
                 let row; 
                 let c, l, s, t, i, d, d2, b, th, tr, td;            
                     
-                console.log("Length: " + settings.devices.length);
                 for (let deviceIndex=0; deviceIndex<settings.devices.length; deviceIndex++)
                 {
                     let device = settings.devices[deviceIndex];
                     if (!device.enabled) {
-                        console.log("Skipping creation of table for device " + midiAccess.outputs.get(device.outputDeviceId).name);
                         continue;
                     }
 
-                    console.log("Creating table for device " + midiAccess.outputs.get(device.outputDeviceId).name);
                     let table = document.createElement("table");
                     table.className = "midiMapperTable center";        
                     tables.appendChild(table);
@@ -485,8 +478,6 @@
                     th.appendChild(l);
                     tr.appendChild(th);
                     b = document.createElement("button"); b.textContent = "Clear all Macros"; b.className = "clearMacrosButton";
-                    console.log("Device coming up");
-                    console.log(device);
                     let outputDeviceId = device.outputDeviceId;
                     b.onclick = function(e) {
                         clearAllMacros(midiAccess, outputDeviceId);
@@ -542,10 +533,6 @@
                                         return; // abort learning
                                     }
                                 }
-                                console.log("Learning text: " + learningText);
-                                console.log("Learning for Device: " + mapping.output.deviceId + " Channel: " + mapping.output.channel + 
-                                    " CC: " + mapping.output.CC);
-                                console.log(mapping); 
                                 lb.className = "learnButton learning"
                                 midiLearnButton = lb;
                                 midiLearnOutput = { 
@@ -559,7 +546,6 @@
                             td.appendChild(lb);
                         }
                     }
-                    console.log("Done creating table for device " + midiAccess.outputs.get(device.outputDeviceId).name);
                 }
             }
 

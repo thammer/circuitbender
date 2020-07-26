@@ -8,8 +8,13 @@ Novation Circuit hacks
 -v settings gui hookup
 -v learn buttons
 -v color midi learn button when learning
+- Embed youtube video with introduction
 - Display drum number instead of synth 2 when drum macro is learned
+- Dynamic help on mouseover
+- Add help text
 - test with 2 circuits
+- Store settings in cookies
+- Store settings in URL
 - pass mappings as parameter to functions, and settings, and get rid of other uses of global variables
 - optimize receiveMIDIMessage
 - javascript in separate file
