@@ -15,7 +15,14 @@
         <div id="content">
             <table id="settingsTable" class="center">
                 <tr id="title">
-                    <th colspan="4">Settings</th>
+                    <th colspan="4"><div style="float:left;text-align:left;">Settings</div>
+                        <div style="float:right;text-align:right;">
+                            <label class="check">Enable Beta features
+                                <input type="checkbox" id="enableBetaCheckbox">
+                                </input>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div></th>
                 </tr>
                 <tr id="heading">
                     <th>Device</th>
@@ -30,6 +37,7 @@
 
         <script src="circuitDrumMacros.js"></script>
         <script>
+            let enableBeta = false;
             let midiLearnActive = false;
             let midiLearnButton;
             let midiLearnOutput; // Struct of deviceId, Channel, Type = CC, CC
@@ -103,6 +111,9 @@
                     name: "Synth 1 pan",
                     type: "CC",
                     CC: 117,
+                    rangeMin: 0,
+                    rangeMax: 127,
+                    default: 64,
                     channel: 15,
                     color: "synth1LightColor",
                     defaultMacro: 7,
@@ -112,6 +123,9 @@
                     name: "Synth 2 pan",
                     type: "CC",
                     CC: 118,
+                    rangeMin: 0,
+                    rangeMax: 127,
+                    default: 64,
                     channel: 15,
                     color: "synth2LightColor",
                     defaultMacro: 7,
@@ -121,6 +135,9 @@
                     name: "Drum 1 pan",
                     type: "CC",
                     CC: 77,
+                    rangeMin: 0,
+                    rangeMax: 127,
+                    default: 64,
                     channel: "drumChannel",
                     color: "drumLightColor",
                     defaultMacro: 5,
@@ -130,6 +147,9 @@
                     name: "Drum 2 pan",
                     type: "CC",
                     CC: 78,
+                    rangeMin: 0,
+                    rangeMax: 127,
+                    default: 64,
                     channel: "drumChannel",
                     color: "drumLightColor",
                     defaultMacro: 6,
@@ -139,6 +159,9 @@
                     name: "Drum 3 pan",
                     type: "CC",
                     CC: 79,
+                    rangeMin: 0,
+                    rangeMax: 127,
+                    default: 64,
                     channel: "drumChannel",
                     color: "drumLightColor",
                     defaultMacro: 5,
@@ -148,6 +171,9 @@
                     name: "Drum 4 pan",
                     type: "CC",
                     CC: 80,
+                    rangeMin: 0,
+                    rangeMax: 127,
+                    default: 64,
                     channel: "drumChannel",
                     color: "drumLightColor",
                     defaultMacro: 6,
@@ -157,10 +183,65 @@
                     name: "Master filter resonance",
                     type: "CC",
                     CC: 71,
+                    rangeMin: 0,
+                    rangeMax: 127,
+                    default: 30,
                     channel: 15,
                     color: "backgroundLightColor",
                     defaultMacro: 8,
                     defaultSynthControl: 1,
+                },
+                {
+                    name: "Synth 1 Osc 1 Wave",
+                    type: "CC",
+                    CC: 19,
+                    rangeMin: 0,
+                    rangeMax: 29,
+                    default: 2,
+                    channel: "synth1Channel",
+                    color: "synth1LightColor",
+                    defaultMacro: 3,
+                    defaultSynthControl: 1,
+                    beta: true,
+                },
+                {
+                    name: "Synth 1 Osc 2 Wave",
+                    type: "CC",
+                    CC: 29,
+                    rangeMin: 0,
+                    rangeMax: 29,
+                    default: 2,
+                    channel: "synth1Channel",
+                    color: "synth1LightColor",
+                    defaultMacro: 4,
+                    defaultSynthControl: 1,
+                    beta: true,
+                },
+                {
+                    name: "Synth 2 Osc 1 Wave",
+                    type: "CC",
+                    CC: 19,
+                    rangeMin: 0,
+                    rangeMax: 29,
+                    default: 2,
+                    channel: "synth2Channel",
+                    color: "synth2LightColor",
+                    defaultMacro: 3,
+                    defaultSynthControl: 2,
+                    beta: true,
+                },
+                {
+                    name: "Synth 2 Osc 2 Wave",
+                    type: "CC",
+                    CC: 29,
+                    rangeMin: 0,
+                    rangeMax: 29,
+                    default: 2,
+                    channel: "synth2Channel",
+                    color: "synth2LightColor",
+                    defaultMacro: 4,
+                    defaultSynthControl: 2,
+                    beta: true,
                 },
             ];
 
@@ -231,6 +312,7 @@
                 let timestamp = event.timeStamp;
                 let channel = event.data[0] & 0x0f;
                 let command = event.data[0] >> 4;
+                let outputValue = 0;
 
                 if (command == 15) // System Common or System Real-Time Messages
                     return;
@@ -276,7 +358,8 @@
                 if (mapping) {
                     if (mapping.enabled) {
                         let outputDevice = midiAccess.outputs.get(mapping.output.deviceId);
-                        sendCC(outputDevice, mapping.output.channel, mapping.output.CC, event.data[2]);                    
+                        outputValue = mapping.output.rangeMin + event.data[2] * (mapping.output.rangeMax - mapping.output.rangeMin) / 127;
+                        sendCC(outputDevice, mapping.output.channel, mapping.output.CC, outputValue);                    
                     }
                 }
             }
@@ -308,6 +391,13 @@
 
             function updateSettingsTable(midiAccess, settings)
             {
+                let enableBetaCheckbox = document.getElementById("enableBetaCheckbox");
+                enableBetaCheckbox.onchange = function() {
+                    enableBeta = enableBetaCheckbox.checked;
+                    updateMappings(midiAccess, mappings);
+                    updateMIDIMapperTables(midiAccess, settings);
+                }
+
                 let table = document.getElementById("settingsTable");              
                 for (let i=table.rows.length-1; i>=2; i--) table.deleteRow(i);
 
@@ -405,7 +495,9 @@
 
                     for (let parameter of parameters)
                     {
-                        let outputChannel = parameter.channel == "drumChannel" ? device.drumChannel : parameter.channel;
+                        if (parameter.beta && !enableBeta)
+                            continue;
+                        let outputChannel = getChannelNumber(parameter.channel, device);
                         let mapping = {
                             enabled: false,
                             input: {
@@ -419,6 +511,8 @@
                                 channel: outputChannel,
                                 type: "CC",
                                 CC: parameter.CC,
+                                rangeMin: parameter.rangeMin,
+                                rangeMax: parameter.rangeMax,
                             },
                         };
                         mappings.push(mapping);
@@ -440,6 +534,14 @@
                         sendNRPN(port, mapping.input.channel, macroKnobs[macro].destinationD[0], macroKnobs[macro].destinationD[1], 0);
                     }
                 });
+            }
+
+            function getChannelNumber(channel, deviceSettings)
+            {
+                return channel == "drumChannel" ? deviceSettings.drumChannel : 
+                       channel == "synth1Channel" ? deviceSettings.synth1Channel : 
+                       channel == "synth2Channel" ? deviceSettings.synth2Channel : 
+                       channel;
             }
 
             function updateMIDIMapperTables(midiAccess, settings)
@@ -514,7 +616,7 @@
     
                             // Output parameter
                             c = row.insertCell(-1); 
-                            let parameter = parameters.find(e => e.CC == mapping.output.CC);
+                            let parameter = parameters.find(e => e.CC == mapping.output.CC && getChannelNumber(e.channel, device) == mapping.output.channel);
                             t = document.createTextNode(parameter.name);
                             c.className = parameter.color;
                             c.appendChild(t);
