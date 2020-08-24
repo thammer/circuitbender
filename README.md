@@ -2,12 +2,12 @@
 Novation Circuit hacks
 
 ## Todo
--v Use number instead of name in for synth in parameters (default control synth), and one array that maps number to name
--v use mappings when updating midi mapper table
--v support drum panning, channel
--v settings gui hookup
--v learn buttons
--v color midi learn button when learning
+- v Use number instead of name in for synth in parameters (default control synth), and one array that maps number to name
+- v use mappings when updating midi mapper table
+- v support drum panning, channel
+- v settings gui hookup
+- v learn buttons
+- v color midi learn button when learning
 - Embed youtube video with introduction
 - Display drum number instead of synth 2 when drum macro is learned
 - Dynamic help on mouseover
